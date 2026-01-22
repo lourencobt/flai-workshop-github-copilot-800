@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -31,7 +31,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     """
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         """Filter queryset based on user permissions"""
@@ -53,7 +53,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     """
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
@@ -113,13 +113,12 @@ class ActivityViewSet(viewsets.ModelViewSet):
     """
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         """Filter queryset based on user permissions"""
-        if self.request.user.is_staff:
-            return Activity.objects.all()
-        return Activity.objects.filter(user=self.request.user)
+        # Allow all users to see all activities for demo purposes
+        return Activity.objects.all()
 
     def perform_create(self, serializer):
         """Set the user when creating an activity"""
@@ -151,7 +150,7 @@ class LeaderboardViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Leaderboard.objects.all()
     serializer_class = LeaderboardSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         """Filter leaderboard by period"""
@@ -212,7 +211,7 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     """
     queryset = Workout.objects.all()
     serializer_class = WorkoutSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
         """Set the creator when creating a workout"""
