@@ -40,32 +40,40 @@ const Leaderboard = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Leaderboard</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">🏆 Leaderboard</h2>
+        <span className="badge bg-warning text-dark">{leaderboard.length} Competitors</span>
+      </div>
       <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead>
+        <table className="table table-hover align-middle">
+          <thead className="table-warning">
             <tr>
-              <th>Rank</th>
-              <th>User</th>
-              <th>Team</th>
-              <th>Total Points</th>
-              <th>Activities</th>
+              <th scope="col" className="text-center">🥇 Rank</th>
+              <th scope="col">👤 User</th>
+              <th scope="col">👥 Team</th>
+              <th scope="col" className="text-center">⭐ Total Points</th>
+              <th scope="col" className="text-center">📊 Activities</th>
             </tr>
           </thead>
           <tbody>
             {leaderboard.length > 0 ? (
               leaderboard.map((entry, index) => (
-                <tr key={entry.id}>
-                  <td>{index + 1}</td>
-                  <td>{entry.user_name || entry.user}</td>
-                  <td>{entry.team_name || entry.team}</td>
-                  <td>{entry.total_points}</td>
-                  <td>{entry.activity_count}</td>
+                <tr key={entry.id} className={index < 3 ? 'table-active' : ''}>
+                  <td className="text-center">
+                    {index === 0 && <span className="badge bg-warning text-dark fs-6">🥇 1</span>}
+                    {index === 1 && <span className="badge bg-secondary text-white fs-6">🥈 2</span>}
+                    {index === 2 && <span className="badge bg-danger text-white fs-6">🥉 3</span>}
+                    {index > 2 && <span className="badge bg-light text-dark border">{index + 1}</span>}
+                  </td>
+                  <td className="fw-bold">{entry.user_name || entry.user}</td>
+                  <td><span className="badge bg-info text-dark">{entry.team_name || entry.team}</span></td>
+                  <td className="text-center fw-bold text-warning">{entry.total_points}</td>
+                  <td className="text-center">{entry.activity_count}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center">No leaderboard data found</td>
+                <td colSpan="5" className="text-center text-muted py-4">No leaderboard data found</td>
               </tr>
             )}
           </tbody>

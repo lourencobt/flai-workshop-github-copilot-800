@@ -40,26 +40,29 @@ const Users = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Users</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">👤 Users</h2>
+        <span className="badge bg-primary">{users.length} Total Users</span>
+      </div>
       <div className="row">
         {users.length > 0 ? (
           users.map((user) => (
             <div key={user.id} className="col-md-6 col-lg-4 mb-4">
-              <div className="card">
+              <div className="card h-100 border-0 shadow-sm">
                 <div className="card-body">
-                  <h5 className="card-title">{user.username}</h5>
-                  <ul className="list-group list-group-flush">
-                    <li className="list-group-item">
-                      <strong>Email:</strong> {user.email}
+                  <h5 className="card-title text-primary fw-bold">{user.username}</h5>
+                  <ul className="list-group list-group-flush mt-3">
+                    <li className="list-group-item border-0 px-0">
+                      <strong>📧 Email:</strong> <span className="text-muted">{user.email}</span>
                     </li>
-                    <li className="list-group-item">
-                      <strong>Team:</strong> {user.team_name || 'No team'}
+                    <li className="list-group-item border-0 px-0">
+                      <strong>👥 Team:</strong> <span className="text-muted">{user.team_name || 'No team'}</span>
                     </li>
-                    <li className="list-group-item">
-                      <strong>Fitness Goal:</strong> {user.fitness_goal || 'Not set'}
+                    <li className="list-group-item border-0 px-0">
+                      <strong>🎯 Fitness Goal:</strong> <span className="text-muted">{user.fitness_goal || 'Not set'}</span>
                     </li>
-                    <li className="list-group-item">
-                      <strong>Joined:</strong> {new Date(user.date_joined).toLocaleDateString()}
+                    <li className="list-group-item border-0 px-0">
+                      <strong>📅 Joined:</strong> <span className="text-muted">{new Date(user.date_joined).toLocaleDateString()}</span>
                     </li>
                   </ul>
                 </div>
@@ -68,7 +71,7 @@ const Users = () => {
           ))
         ) : (
           <div className="col-12">
-            <div className="alert alert-info">No users found</div>
+            <div className="alert alert-info text-center">No users found</div>
           </div>
         )}
       </div>

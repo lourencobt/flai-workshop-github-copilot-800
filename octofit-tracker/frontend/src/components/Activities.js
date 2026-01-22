@@ -40,34 +40,37 @@ const Activities = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Activities</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">🏃 Activities</h2>
+        <span className="badge bg-success">{activities.length} Total Activities</span>
+      </div>
       <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead>
+        <table className="table table-striped table-hover align-middle">
+          <thead className="table-primary">
             <tr>
-              <th>User</th>
-              <th>Type</th>
-              <th>Duration (min)</th>
-              <th>Distance (km)</th>
-              <th>Calories</th>
-              <th>Date</th>
+              <th scope="col">👤 User</th>
+              <th scope="col">🏋️ Type</th>
+              <th scope="col">⏱️ Duration (min)</th>
+              <th scope="col">📏 Distance (km)</th>
+              <th scope="col">🔥 Calories</th>
+              <th scope="col">📅 Date</th>
             </tr>
           </thead>
           <tbody>
             {activities.length > 0 ? (
               activities.map((activity) => (
                 <tr key={activity.id}>
-                  <td>{activity.user_name || activity.user}</td>
-                  <td>{activity.activity_type}</td>
+                  <td className="fw-semibold">{activity.user_name || activity.user}</td>
+                  <td><span className="badge bg-info text-dark">{activity.activity_type}</span></td>
                   <td>{activity.duration}</td>
                   <td>{activity.distance}</td>
-                  <td>{activity.calories_burned}</td>
+                  <td className="text-danger fw-bold">{activity.calories_burned}</td>
                   <td>{new Date(activity.date).toLocaleDateString()}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center">No activities found</td>
+                <td colSpan="6" className="text-center text-muted py-4">No activities found</td>
               </tr>
             )}
           </tbody>
