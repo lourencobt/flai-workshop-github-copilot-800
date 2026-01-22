@@ -2,37 +2,40 @@ import React, { useState, useEffect } from 'react';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
-        const apiUrl = `https://${process.env.REACT_APP_CODESPACE_NAME}-8000.app.github.dev/api/users/`;
-        console.log('Users - Fetching from:', apiUrl);
+        const baseUrl = `https://${process.env.REACT_APP_CODESPACE_NAME}-8000.app.github.dev/api`;
         
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch users and teams in parallel
+        const [usersResponse, teamsResponse] = await Promise.all([
+          fetch(`${baseUrl}/users/`),
+          fetch(`${baseUrl}/teams/`)
+        ]);
+        
+        if (!usersResponse.ok || !teamsResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
         
-        const data = await response.json();
-        console.log('Users - Fetched data:', data);
+        const usersData = await usersResponse.json();
+        const teamsData = await teamsResponse.json();
         
         // Handle both paginated (.results) and plain array responses
-        const usersData = data.results || data;
-        console.log('Users - Processed data:', usersData);
-        
-        setUsers(usersData);
+        setUsers(usersData.results || usersData);
+        setTeams(teamsData.results || teamsData);
         setLoading(false);
       } catch (err) {
-        console.error('Users - Error fetching data:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
         setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchData();
   }, []);
 
   if (loading) return <div className="container mt-4">Loading users...</div>;
@@ -44,37 +47,51 @@ const Users = () => {
         <h2 className="mb-0">👤 Users</h2>
         <span className="badge bg-primary">{users.length} Total Users</span>
       </div>
-      <div className="row">
-        {users.length > 0 ? (
-          users.map((user) => (
-            <div key={user.id} className="col-md-6 col-lg-4 mb-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title text-primary fw-bold">{user.username}</h5>
-                  <ul className="list-group list-group-flush mt-3">
-                    <li className="list-group-item border-0 px-0">
-                      <strong>📧 Email:</strong> <span className="text-muted">{user.email}</span>
-                    </li>
-                    <li className="list-group-item border-0 px-0">
-                      <strong>👥 Team:</strong> <span className="text-muted">{user.team_name || 'No team'}</span>
-                    </li>
-                    <li className="list-group-item border-0 px-0">
-                      <strong>🎯 Fitness Goal:</strong> <span className="text-muted">{user.fitness_goal || 'Not set'}</span>
-                    </li>
-                    <li className="list-group-item border-0 px-0">
-                      <strong>📅 Joined:</strong> <span className="text-muted">{new Date(user.date_joined).toLocaleDateString()}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+      
+      {users.length > 0 ? (
+        <div className="card shadow-sm">
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Team</th>
+                    <th>Joined</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <strong className="text-primary">{user.username}</strong>
+                      </td>
+                      <td>{user.first_name} {user.last_name}</td>
+                      <td>
+                        <small className="text-muted">{user.email}</small>
+                      </td>
+                      <td>
+                        {user.team_name ? (
+                          <span className="badge bg-success">{user.team_name}</span>
+                        ) : (
+                          <span className="badge bg-secondary">No Team</span>
+                        )}
+                      </td>
+                      <td>
+                        <small>{new Date(user.date_joined).toLocaleDateString()}</small>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))
-        ) : (
-          <div className="col-12">
-            <div className="alert alert-info text-center">No users found</div>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="alert alert-info text-center">No users found</div>
+      )}
     </div>
   );
 };

@@ -12,7 +12,7 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'users'
+        db_table = 'user_profiles'
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

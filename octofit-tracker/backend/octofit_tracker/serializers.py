@@ -17,10 +17,21 @@ class ObjectIdField(serializers.Field):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    team_name = serializers.SerializerMethodField()
+    team_id = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['id']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'team_name', 'team_id', 'date_joined']
+        read_only_fields = ['id', 'date_joined']
+    
+    def get_team_name(self, obj):
+        team = obj.teams.first()
+        return team.name if team else None
+    
+    def get_team_id(self, obj):
+        team = obj.teams.first()
+        return str(team._id) if team else None
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

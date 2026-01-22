@@ -1,319 +1,253 @@
 from django.core.management.base import BaseCommand
-from pymongo import MongoClient
+from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 import random
+from octofit_tracker.models import Team, Activity, Leaderboard, Workout, UserProfile
 
 
 class Command(BaseCommand):
     help = 'Populate the octofit_db database with test data'
 
     def handle(self, *args, **options):
-        # Connect to MongoDB
-        client = MongoClient('localhost', 27017)
-        db = client['octofit_db']
-
         self.stdout.write(self.style.SUCCESS('Starting database population...'))
 
         # Clear existing data
         self.stdout.write('Clearing existing data...')
-        db.users.delete_many({})
-        db.teams.delete_many({})
-        db.activities.delete_many({})
-        db.leaderboard.delete_many({})
-        db.workouts.delete_many({})
-
-        # Create unique index on email field
-        self.stdout.write('Creating unique index on email field...')
-        db.users.create_index([("email", 1)], unique=True)
+        Activity.objects.all().delete()
+        Leaderboard.objects.all().delete()
+        Workout.objects.all().delete()
+        Team.objects.all().delete()
+        UserProfile.objects.all().delete()
+        User.objects.all().delete()
 
         # Insert Teams
         self.stdout.write('Inserting teams...')
-        teams = [
-            {
-                "_id": 1,
-                "name": "Team Marvel",
-                "description": "Earth's Mightiest Heroes",
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 2,
-                "name": "Team DC",
-                "description": "The Justice League",
-                "created_at": datetime.now()
-            }
-        ]
-        db.teams.insert_many(teams)
+        team_marvel = Team.objects.create(
+            name="Team Marvel",
+            description="Earth's Mightiest Heroes"
+        )
+        
+        team_dc = Team.objects.create(
+            name="Team DC",
+            description="The Justice League"
+        )
 
         # Insert Users (Superheroes)
         self.stdout.write('Inserting users...')
-        users = [
-            # Team Marvel
-            {
-                "_id": 1,
-                "username": "ironman",
-                "email": "tony.stark@marvel.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Tony",
-                "last_name": "Stark",
-                "team_id": 1,
-                "total_points": 1250,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 2,
-                "username": "captainamerica",
-                "email": "steve.rogers@marvel.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Steve",
-                "last_name": "Rogers",
-                "team_id": 1,
-                "total_points": 1180,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 3,
-                "username": "blackwidow",
-                "email": "natasha.romanoff@marvel.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Natasha",
-                "last_name": "Romanoff",
-                "team_id": 1,
-                "total_points": 1150,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 4,
-                "username": "thor",
-                "email": "thor.odinson@marvel.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Thor",
-                "last_name": "Odinson",
-                "team_id": 1,
-                "total_points": 1320,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 5,
-                "username": "hulk",
-                "email": "bruce.banner@marvel.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Bruce",
-                "last_name": "Banner",
-                "team_id": 1,
-                "total_points": 1400,
-                "created_at": datetime.now()
-            },
-            # Team DC
-            {
-                "_id": 6,
-                "username": "superman",
-                "email": "clark.kent@dc.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Clark",
-                "last_name": "Kent",
-                "team_id": 2,
-                "total_points": 1500,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 7,
-                "username": "batman",
-                "email": "bruce.wayne@dc.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Bruce",
-                "last_name": "Wayne",
-                "team_id": 2,
-                "total_points": 1450,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 8,
-                "username": "wonderwoman",
-                "email": "diana.prince@dc.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Diana",
-                "last_name": "Prince",
-                "team_id": 2,
-                "total_points": 1380,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 9,
-                "username": "flash",
-                "email": "barry.allen@dc.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Barry",
-                "last_name": "Allen",
-                "team_id": 2,
-                "total_points": 1220,
-                "created_at": datetime.now()
-            },
-            {
-                "_id": 10,
-                "username": "aquaman",
-                "email": "arthur.curry@dc.com",
-                "password": "pbkdf2_sha256$260000$test",
-                "first_name": "Arthur",
-                "last_name": "Curry",
-                "team_id": 2,
-                "total_points": 1100,
-                "created_at": datetime.now()
-            }
-        ]
-        db.users.insert_many(users)
+        
+        # Team Marvel users
+        user1 = User.objects.create_user(
+            username='ironman',
+            email='tony.stark@marvel.com',
+            password='test123',
+            first_name='Tony',
+            last_name='Stark'
+        )
+        UserProfile.objects.create(user=user1, fitness_level='advanced', points=1250)
+        team_marvel.members.add(user1)
+        team_marvel.captain = user1
+        team_marvel.save()
+        
+        user2 = User.objects.create_user(
+            username='captainamerica',
+            email='steve.rogers@marvel.com',
+            password='test123',
+            first_name='Steve',
+            last_name='Rogers'
+        )
+        UserProfile.objects.create(user=user2, fitness_level='advanced', points=1180)
+        team_marvel.members.add(user2)
+        
+        user3 = User.objects.create_user(
+            username='blackwidow',
+            email='natasha.romanoff@marvel.com',
+            password='test123',
+            first_name='Natasha',
+            last_name='Romanoff'
+        )
+        UserProfile.objects.create(user=user3, fitness_level='advanced', points=1150)
+        team_marvel.members.add(user3)
+        
+        user4 = User.objects.create_user(
+            username='thor',
+            email='thor.odinson@marvel.com',
+            password='test123',
+            first_name='Thor',
+            last_name='Odinson'
+        )
+        UserProfile.objects.create(user=user4, fitness_level='advanced', points=1320)
+        team_marvel.members.add(user4)
+        
+        user5 = User.objects.create_user(
+            username='hulk',
+            email='bruce.banner@marvel.com',
+            password='test123',
+            first_name='Bruce',
+            last_name='Banner'
+        )
+        UserProfile.objects.create(user=user5, fitness_level='intermediate', points=1100)
+        team_marvel.members.add(user5)
+        
+        # Team DC users
+        user6 = User.objects.create_user(
+            username='superman',
+            email='clark.kent@dc.com',
+            password='test123',
+            first_name='Clark',
+            last_name='Kent'
+        )
+        UserProfile.objects.create(user=user6, fitness_level='advanced', points=1400)
+        team_dc.members.add(user6)
+        team_dc.captain = user6
+        team_dc.save()
+        
+        user7 = User.objects.create_user(
+            username='batman',
+            email='bruce.wayne@dc.com',
+            password='test123',
+            first_name='Bruce',
+            last_name='Wayne'
+        )
+        UserProfile.objects.create(user=user7, fitness_level='advanced', points=1350)
+        team_dc.members.add(user7)
+        
+        user8 = User.objects.create_user(
+            username='wonderwoman',
+            email='diana.prince@dc.com',
+            password='test123',
+            first_name='Diana',
+            last_name='Prince'
+        )
+        UserProfile.objects.create(user=user8, fitness_level='advanced', points=1280)
+        team_dc.members.add(user8)
+        
+        user9 = User.objects.create_user(
+            username='flash',
+            email='barry.allen@dc.com',
+            password='test123',
+            first_name='Barry',
+            last_name='Allen'
+        )
+        UserProfile.objects.create(user=user9, fitness_level='intermediate', points=1200)
+        team_dc.members.add(user9)
+        
+        user10 = User.objects.create_user(
+            username='aquaman',
+            email='arthur.curry@dc.com',
+            password='test123',
+            first_name='Arthur',
+            last_name='Curry'
+        )
+        UserProfile.objects.create(user=user10, fitness_level='intermediate', points=1050)
+        team_dc.members.add(user10)
+        
+        users = [user1, user2, user3, user4, user5, user6, user7, user8, user9, user10]
 
         # Insert Activities
         self.stdout.write('Inserting activities...')
-        activities = []
-        activity_types = ['Running', 'Cycling', 'Swimming', 'Weightlifting', 'Yoga', 'Boxing', 'CrossFit']
+        activity_types = ['running', 'walking', 'cycling', 'swimming', 'strength_training', 'yoga']
         
+        activities_count = 0
         for user in users:
             for i in range(random.randint(5, 15)):
                 activity_date = datetime.now() - timedelta(days=random.randint(0, 30))
-                activity = {
-                    "user_id": user["_id"],
-                    "activity_type": random.choice(activity_types),
-                    "duration_minutes": random.randint(20, 120),
-                    "calories_burned": random.randint(100, 800),
-                    "distance_km": round(random.uniform(1, 20), 2) if random.choice(activity_types) in ['Running', 'Cycling', 'Swimming'] else 0,
-                    "points_earned": random.randint(50, 200),
-                    "date": activity_date,
-                    "notes": f"Great workout session!"
-                }
-                activities.append(activity)
-        
-        db.activities.insert_many(activities)
+                activity_type = random.choice(activity_types)
+                duration = random.randint(20, 120)
+                distance = round(random.uniform(1, 20), 2) if activity_type in ['running', 'walking', 'cycling', 'swimming'] else None
+                
+                Activity.objects.create(
+                    user=user,
+                    activity_type=activity_type,
+                    duration=duration,
+                    distance=distance,
+                    calories=random.randint(100, 800),
+                    points_earned=random.randint(50, 200),
+                    date=activity_date,
+                    notes="Great workout session!"
+                )
+                activities_count += 1
 
         # Insert Workouts (Suggested workout plans)
         self.stdout.write('Inserting workouts...')
-        workouts = [
+        workouts_data = [
             {
-                "_id": 1,
-                "name": "Hero Strength Training",
-                "description": "Build superhuman strength with this intensive workout",
-                "category": "Strength",
-                "difficulty": "Advanced",
-                "duration_minutes": 60,
-                "exercises": [
-                    {"name": "Bench Press", "sets": 4, "reps": 10},
-                    {"name": "Squats", "sets": 4, "reps": 12},
-                    {"name": "Deadlifts", "sets": 4, "reps": 8},
-                    {"name": "Pull-ups", "sets": 3, "reps": 15}
-                ],
-                "created_at": datetime.now()
+                "title": "Hero Strength Training",
+                "description": "Build superhuman strength with this intensive workout. Includes bench press, squats, deadlifts, and pull-ups.",
+                "difficulty": "advanced",
+                "duration": 60,
+                "activity_type": "strength_training"
             },
             {
-                "_id": 2,
-                "name": "Speedster Cardio",
-                "description": "Train like the fastest heroes alive",
-                "category": "Cardio",
-                "difficulty": "Intermediate",
-                "duration_minutes": 45,
-                "exercises": [
-                    {"name": "Sprint Intervals", "sets": 6, "duration": "30 seconds"},
-                    {"name": "Jump Rope", "sets": 3, "duration": "2 minutes"},
-                    {"name": "Burpees", "sets": 3, "reps": 20},
-                    {"name": "High Knees", "sets": 3, "duration": "1 minute"}
-                ],
-                "created_at": datetime.now()
+                "title": "Speedster Cardio",
+                "description": "Train like the fastest heroes alive. Sprint intervals, jump rope, burpees, and high knees.",
+                "difficulty": "intermediate",
+                "duration": 45,
+                "activity_type": "running"
             },
             {
-                "_id": 3,
-                "name": "Warrior Endurance",
-                "description": "Build stamina for long battles",
-                "category": "Endurance",
-                "difficulty": "Intermediate",
-                "duration_minutes": 90,
-                "exercises": [
-                    {"name": "Long Distance Run", "duration": "60 minutes"},
-                    {"name": "Plank Hold", "sets": 3, "duration": "2 minutes"},
-                    {"name": "Mountain Climbers", "sets": 4, "reps": 30},
-                    {"name": "Jump Squats", "sets": 3, "reps": 20}
-                ],
-                "created_at": datetime.now()
+                "title": "Warrior Endurance",
+                "description": "Build stamina for long battles. Long distance run, plank hold, mountain climbers.",
+                "difficulty": "intermediate",
+                "duration": 90,
+                "activity_type": "running"
             },
             {
-                "_id": 4,
-                "name": "Flexibility & Recovery",
-                "description": "Maintain agility and prevent injuries",
-                "category": "Flexibility",
-                "difficulty": "Beginner",
-                "duration_minutes": 30,
-                "exercises": [
-                    {"name": "Yoga Flow", "duration": "15 minutes"},
-                    {"name": "Dynamic Stretching", "duration": "10 minutes"},
-                    {"name": "Foam Rolling", "duration": "5 minutes"}
-                ],
-                "created_at": datetime.now()
+                "title": "Flexibility & Recovery",
+                "description": "Maintain agility and prevent injuries. Yoga flow, dynamic stretching, foam rolling.",
+                "difficulty": "beginner",
+                "duration": 30,
+                "activity_type": "yoga"
             },
             {
-                "_id": 5,
-                "name": "Combat Training",
-                "description": "Master hand-to-hand combat techniques",
-                "category": "Combat",
-                "difficulty": "Advanced",
-                "duration_minutes": 60,
-                "exercises": [
-                    {"name": "Shadow Boxing", "sets": 5, "duration": "3 minutes"},
-                    {"name": "Heavy Bag Work", "sets": 4, "duration": "3 minutes"},
-                    {"name": "Speed Bag", "sets": 3, "duration": "2 minutes"},
-                    {"name": "Grappling Drills", "sets": 3, "duration": "5 minutes"}
-                ],
-                "created_at": datetime.now()
+                "title": "Combat Training",
+                "description": "Master hand-to-hand combat techniques. Shadow boxing, heavy bag work, speed bag, grappling drills.",
+                "difficulty": "advanced",
+                "duration": 60,
+                "activity_type": "strength_training"
             }
         ]
-        db.workouts.insert_many(workouts)
+        
+        for workout_data in workouts_data:
+            Workout.objects.create(**workout_data)
 
         # Calculate and insert Leaderboard entries
         self.stdout.write('Calculating leaderboard...')
-        leaderboard_entries = []
         
-        # Individual leaderboard
-        for user in sorted(users, key=lambda x: x['total_points'], reverse=True):
-            rank = len(leaderboard_entries) + 1
-            leaderboard_entries.append({
-                "user_id": user["_id"],
-                "username": user["username"],
-                "team_id": user["team_id"],
-                "total_points": user["total_points"],
-                "rank": rank,
-                "leaderboard_type": "individual",
-                "updated_at": datetime.now()
-            })
-        
-        # Team leaderboard
-        team_scores = {}
+        leaderboard_count = 0
         for user in users:
-            team_id = user["team_id"]
-            if team_id not in team_scores:
-                team_scores[team_id] = {"total": 0, "count": 0}
-            team_scores[team_id]["total"] += user["total_points"]
-            team_scores[team_id]["count"] += 1
+            user_activities = Activity.objects.filter(user=user)
+            total_points = sum(a.points_earned for a in user_activities)
+            total_activities = user_activities.count()
+            total_duration = sum(a.duration for a in user_activities)
+            total_distance = sum(a.distance for a in user_activities if a.distance)
+            
+            Leaderboard.objects.create(
+                user=user,
+                total_points=total_points,
+                total_activities=total_activities,
+                total_duration=total_duration,
+                total_distance=total_distance,
+                period='all_time'
+            )
+            leaderboard_count += 1
         
-        team_rank = 1
-        for team in sorted(teams, key=lambda x: team_scores[x["_id"]]["total"], reverse=True):
-            team_id = team["_id"]
-            leaderboard_entries.append({
-                "team_id": team_id,
-                "team_name": team["name"],
-                "total_points": team_scores[team_id]["total"],
-                "member_count": team_scores[team_id]["count"],
-                "average_points": round(team_scores[team_id]["total"] / team_scores[team_id]["count"], 2),
-                "rank": team_rank,
-                "leaderboard_type": "team",
-                "updated_at": datetime.now()
-            })
-            team_rank += 1
+        # Update ranks
+        leaderboard_entries = Leaderboard.objects.filter(period='all_time').order_by('-total_points')
+        for rank, entry in enumerate(leaderboard_entries, start=1):
+            entry.rank = rank
+            entry.save()
         
-        db.leaderboard.insert_many(leaderboard_entries)
+        # Update team points
+        team_marvel.total_points = sum(Activity.objects.filter(user__in=team_marvel.members.all()).values_list('points_earned', flat=True))
+        team_marvel.save()
+        
+        team_dc.total_points = sum(Activity.objects.filter(user__in=team_dc.members.all()).values_list('points_earned', flat=True))
+        team_dc.save()
 
-        # Summary
         self.stdout.write(self.style.SUCCESS('\n=== Database Population Complete ==='))
-        self.stdout.write(self.style.SUCCESS(f'Teams created: {db.teams.count_documents({})}'))
-        self.stdout.write(self.style.SUCCESS(f'Users created: {db.users.count_documents({})}'))
-        self.stdout.write(self.style.SUCCESS(f'Activities created: {db.activities.count_documents({})}'))
-        self.stdout.write(self.style.SUCCESS(f'Workouts created: {db.workouts.count_documents({})}'))
-        self.stdout.write(self.style.SUCCESS(f'Leaderboard entries created: {db.leaderboard.count_documents({})}'))
+        self.stdout.write(self.style.SUCCESS(f'Teams created: 2'))
+        self.stdout.write(self.style.SUCCESS(f'Users created: {len(users)}'))
+        self.stdout.write(self.style.SUCCESS(f'Activities created: {activities_count}'))
+        self.stdout.write(self.style.SUCCESS(f'Workouts created: {len(workouts_data)}'))
+        self.stdout.write(self.style.SUCCESS(f'Leaderboard entries created: {leaderboard_count}'))
         self.stdout.write(self.style.SUCCESS('\nDatabase successfully populated with superhero test data!'))
-        
-        client.close()
