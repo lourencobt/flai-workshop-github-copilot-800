@@ -60,11 +60,11 @@ const Activities = () => {
             {activities.length > 0 ? (
               activities.map((activity) => (
                 <tr key={activity.id}>
-                  <td className="fw-semibold">{activity.user_name || activity.user}</td>
+                  <td className="fw-semibold">{activity.username || activity.user?.username || 'Unknown'}</td>
                   <td><span className="badge bg-info text-dark">{activity.activity_type}</span></td>
                   <td>{activity.duration}</td>
-                  <td>{activity.distance}</td>
-                  <td className="text-danger fw-bold">{activity.calories_burned}</td>
+                  <td>{activity.distance || 'N/A'}</td>
+                  <td className="text-danger fw-bold">{activity.calories}</td>
                   <td>{new Date(activity.date).toLocaleDateString()}</td>
                 </tr>
               ))

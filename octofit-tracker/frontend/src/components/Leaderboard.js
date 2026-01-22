@@ -65,10 +65,10 @@ const Leaderboard = () => {
                     {index === 2 && <span className="badge bg-danger text-white fs-6">🥉 3</span>}
                     {index > 2 && <span className="badge bg-light text-dark border">{index + 1}</span>}
                   </td>
-                  <td className="fw-bold">{entry.user_name || entry.user}</td>
-                  <td><span className="badge bg-info text-dark">{entry.team_name || entry.team}</span></td>
+                  <td className="fw-bold">{entry.username || entry.user?.username || 'Unknown'}</td>
+                  <td><span className="badge bg-info text-dark">{entry.user?.team_name || 'No Team'}</span></td>
                   <td className="text-center fw-bold text-warning">{entry.total_points}</td>
-                  <td className="text-center">{entry.activity_count}</td>
+                  <td className="text-center">{entry.total_activities}</td>
                 </tr>
               ))
             ) : (

@@ -49,6 +49,7 @@ class TeamSerializer(serializers.ModelSerializer):
     _id = ObjectIdField(read_only=True)
     members = UserSerializer(many=True, read_only=True)
     captain = UserSerializer(read_only=True)
+    member_count = serializers.SerializerMethodField()
     member_ids = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True,
@@ -58,9 +59,12 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['_id', 'name', 'description', 'members', 'captain', 'total_points', 
+        fields = ['_id', 'name', 'description', 'members', 'captain', 'member_count', 'total_points', 
                   'created_at', 'updated_at', 'member_ids', 'captain_id']
-        read_only_fields = ['_id', 'total_points', 'created_at', 'updated_at']
+        read_only_fields = ['_id', 'member_count', 'total_points', 'created_at', 'updated_at']
+    
+    def get_member_count(self, obj):
+        return obj.members.count()
 
     def create(self, validated_data):
         member_ids = validated_data.pop('member_ids', [])
